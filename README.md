@@ -1,155 +1,115 @@
-📚 StudyHere – React Study Space Finder
+# 📚 StudyHere – React Study Space Finder
 
-StudyHere is a simple React application that allows students to browse, filter, and reserve study spaces across campus. This project serves as a hands-on introduction to key React fundamentals such as components, props, state, event handling, and list rendering with .map().
+StudyHere is a simple React app that helps students explore, filter, and reserve study spaces across campus. It demonstrates key React concepts such as components, props, state, event handling, and list rendering with `.map()`.
 
-Links: https://studyhere.vercel.app/
+Link: https://studyhere.vercel.app/
 
+## ⭐ Overview
 
-📝 Overview
+StudyHere allows users to browse different study locations across campus, filter them by capacity, noise level, availability, and more, and reserve a space using a simple toggle button. This project was built as a hands-on introduction to React fundamentals.
 
-The StudyHere app displays a collection of study spaces located across different campus buildings. Users can:
+## 🚀 Features
 
-Explore the list of spaces
+### ✔ Browse study spaces
 
-Filter by capacity, opening status, and search terms
+Each space displays:
+- Name & building
+- Emoji icon
+- Capacity
+- Noise level
+- Open/Closed status
+- Outlets availability
 
-Sort the spaces by name or capacity
+### ✔ Filters
 
-Reserve a study space with a toggle button
+Users can filter spaces by:
+- Search query
+- Minimum capacity
+- Open now
+- Sorting (name or capacity)
 
-This small app demonstrates how React helps build dynamic, interactive UIs without manually updating the DOM.
+### ✔ Reserve a space
 
-✨ Features
-✔ Browse Spaces
+A simple toggle button switches between:
+- Reserve
+- Reserved
 
-Each study space card shows:
+The button also changes color to indicate reservation status.
 
-Name
+### ✔ Fully interactive UI
 
-Building
+All updates are managed using React state, re-rendering only the components that change.
 
-Emoji icon
+## 🧩 Components
 
-Capacity
+### App.jsx
 
-Noise level
+Main application component. Responsibilities:
+- Holds all app-level state (`searchTerm`, `minCapacity`, `sortBy`, `onlyOpen`, `reserved`)
+- Filters and sorts study spaces
+- Passes props to child components
+- Handles `onToggleReserved`
 
-Outlet availability
+### Header
 
-Open/Closed status
+Displays the title and introduction.
 
-✔ Filtering
+### Filters
 
-Users can filter study spaces by:
+Receives props from `App` and triggers:
+- `onSearch`
+- `onCapacity`
+- `onOnlyOpen`
+- `onSort`
 
-Text search
+This component updates the filtering state in the parent.
 
-Minimum capacity
+### StudySpaceList
 
-“Open now” checkbox
+Renders a list of study spaces using `.map()`. Receives:
+- Filtered list of spaces
+- Reserved state
+- `onToggleReserved`
 
-Sorting options (A–Z, capacity ascending/descending)
+### StudySpaceCard
 
-✔ Reservation Toggle
+Displays individual study space information. Includes the Reserve ↔ Reserved toggle button. Receives:
+- A space object
+- `isReserved`
+- `onToggleReserved`
 
-Each space includes a Reserve / Reserved toggle button:
+### Chip
 
-“Reserve” → white/gray button
+A small reusable UI component used to display tags (e.g., "Open now", "Quiet", "Outlets available").
 
-“Reserved” → green highlighted button
+## ⚙️ How It Works
 
-State updates immediately change the UI.
+### 1. State Management
 
-✔ Fully interactive with React state
+All main reactive data lives in `App.jsx`:
+- `searchTerm`
+- `minCapacity`
+- `onlyOpen`
+- `sortBy`
+- `reserved` (Set of reserved study space IDs)
 
-All user interactions are state-driven and re-render automatically.
+Updating state triggers automatic UI updates.
 
-🧩 Components
-App.jsx
+### 2. Filtering and Sorting
 
-The root component that:
+A `useMemo` hook recalculates the filtered list when the user updates:
+- Search text
+- Minimum capacity
+- Open-now checkbox
+- Sorting preference
 
-Holds the main state (searchTerm, minCapacity, onlyOpen, sortBy, reserved)
+This keeps the UI responsive and avoids unnecessary recalculations.
 
-Filters/sorts study spaces with useMemo
+### 3. Reservation Toggle
 
-Passes props + event handlers to children
+The "Reserve / Reserved" button works by updating the `reserved` Set:
 
-Renders the main layout
-
-Header.jsx
-
-A simple header section displaying the app title and description.
-
-Filters.jsx
-
-Contains:
-
-Search bar
-
-Capacity input
-
-“Open now” checkbox
-
-Sorting dropdown
-
-Receives callback props from App and returns updated values.
-
-StudySpaceList.jsx
-
-Displays the filtered list using .map().
-Receives:
-
-Filtered spaces
-
-reserved Set
-
-onToggleReserved handler
-
-StudySpaceCard.jsx
-
-Shows individual space details, including:
-
-Emoji, name, building
-
-Tags (chips) for noise, outlets, capacity, open status
-
-Reservation toggle button
-
-Receives:
-
-space object
-
-isReserved boolean
-
-onToggleReserved callback
-
-Chip.jsx
-
-A reusable component for small tagged labels.
-
-⚙️ How It Works
-🔹 1. Data & State
-
-App stores:
-
-const [reserved, setReserved] = useState(new Set());
-
-
-A Set is used for fast add/remove operations when reserving spaces.
-
-🔹 2. Filtering Logic
-
-useMemo recalculates the filtered list only when needed:
-
-const filtered = useMemo(() => {
-  return spaces.filter(...);
-}, [searchTerm, minCapacity, onlyOpen, sortBy]);
-
-🔹 3. Reservation Button
-
-The Reserve/Reserved toggle works by adding/removing the space id in the Set:
-
+```javascript
 const toggleReserved = (id) => {
   setReserved(prev => {
     const next = new Set(prev);
@@ -157,25 +117,46 @@ const toggleReserved = (id) => {
     return next;
   });
 };
+```
 
+The card's button reads from this state:
+- Shows **Reserve** when not reserved
+- Shows **Reserved** (green highlight) when reserved
 
-UI updates instantly because React re-renders the component tree.
+### 4. Props Flow
 
-🔹 4. Props Flow
+- `App` ➝ passes props ➝ `Filters`, `StudySpaceList`
+- `StudySpaceList` ➝ passes props ➝ `StudySpaceCard`
+- `StudySpaceCard` → triggers callback → back to `App`
 
-React’s one-way data flow looks like:
+This one-way data flow is a core React pattern.
 
-App  
- ├── Filters (gets setters)  
- ├── StudySpaceList (gets filtered spaces + reserved)  
-       └── StudySpaceCard (gets space + isReserved + toggle handler)
+## 🛠️ Getting Started
 
-📦 Installation & Running the App
-1. Install dependencies
+### Install dependencies:
+
+```bash
 npm install
+```
 
-2. Start the development server
+### Run the dev server:
+
+```bash
 npm run dev
+```
 
-3. Open in the browser
+### Open in browser:
+
+```
 http://localhost:5173
+```
+
+## 📦 Tech Stack
+
+- **React** - UI library
+- **Vite** - Build tool and dev server
+- **JavaScript (ES6+)** - Programming language
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
